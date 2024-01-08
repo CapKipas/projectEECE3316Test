@@ -1,0 +1,72 @@
+# Function to simulate instruction execution (updated for multiple instructions)
+import tkinter as tk
+import time
+def simulate_instruction(instruction, stage_labels, stage_delays):
+    for i, stage in enumerate(stages):
+        stage_labels[i]["text"] = instruction + " - " + stage
+        time.sleep(stage_delays[stage])  # Simulate processing time
+
+
+
+# Function to start the simulation
+def start_simulation():
+    instructions = get_instructions_from_user()  # Fetch instructions from user input
+    stage_delays = {stage: int(entry.get()) for stage, entry in timing_entries.items()}  # Get stage delays
+
+    for instruction in instructions:
+        simulate_instruction(instruction, stage_labels, stage_delays)
+
+
+# Create main window
+root = tk.Tk()
+root.title("Instruction Pipeline Simulator")
+
+# Define stages
+stages = ["Fetch", "Decode", "Execute", "Write Back"]
+
+# Create labels for stages
+stage_labels = []
+for i, stage in enumerate(stages):
+    label = tk.Label(root, text=stage)
+    label.grid(row=0, column=i)
+    stage_labels.append(label)
+
+# Create input fields for stage timings
+timing_entries = {}
+for i, stage in enumerate(stages):
+    entry = tk.Entry(root)
+    entry.grid(row=1, column=i)
+    timing_entries[stage] = entry
+
+# Function to calculate time and speedup
+def calculate_time():
+    timings = {stage: int(entry.get()) for stage, entry in timing_entries.items()}
+
+    # Calculate non-pipelined time, pipelined time, and speedup
+    non_pipelined_time = sum(timings.values())  # Assuming no stalls
+    pipelined_time = max(timings.values()) + (len(timings) - 1) * max(timings.values())  # Simple calculation, adjust for stalls
+    speedup = non_pipelined_time / pipelined_time
+
+    # Display results
+    non_pipelined_time_label["text"] = f"Non-pipelined time: {non_pipelined_time}"
+    pipelined_time_label["text"] = f"Pipelined time: {pipelined_time}"
+    speedup_label["text"] = f"Speedup: {speedup:.2f}"
+
+# Create labels for results
+non_pipelined_time_label = tk.Label(root)
+pipelined_time_label = tk.Label(root)
+speedup_label = tk.Label(root)
+non_pipelined_time_label.grid(row=4, column=0)
+pipelined_time_label.grid(row=4, column=1)
+speedup_label.grid(row=4, column=2)
+#comment is funny
+# Create buttons
+calculate_button = tk.Button(root, text="Calculate", command=calculate_time)
+calculate_button.grid(row=3, columnspan=4)
+# Button to start simulation
+start_button = tk.Button(root, text="Start Simulation", command=start_simulation)
+start_button.grid(row=5, columnspan=4)
+# ... (Add code for simulation logic and visual elements, including space state diagram)
+
+# Run the GUI
+root.mainloop()
