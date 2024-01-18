@@ -206,7 +206,7 @@ for i in range(10):  # Assuming a maximum of 10 instructions for simplicity
 button_run = tk.Button(root, text="Run Simulation", command=run_simulation)
 button_run.pack()
 
-result_text = tk.Text(root, height=20, width=80)
+result_text = tk.Text(root, height=20, width=200)
 result_text.pack()
 
 root.mainloop()
