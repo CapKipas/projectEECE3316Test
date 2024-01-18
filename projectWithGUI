@@ -198,7 +198,7 @@ labels_stages = ["Fetch", "Decode", "Execute", "Write Back"]
 entry_instructions = []
 
 for i in range(10):  # Assuming a maximum of 10 instructions for simplicity
-    tk.Label(root, text=f"Instruction {i + 1} times for each stage (space-separated):").pack()
+    tk.Label(root, text=f"Instruction {i + 1} times for each stage (space-separated, 4 stages):").pack()
     entry = tk.Entry(root)
     entry.pack()
     entry_instructions.append(entry)
