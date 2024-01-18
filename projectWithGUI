@@ -1,0 +1,212 @@
+import tkinter as tk
+from tkinter import ttk
+
+
+def convert_to_Instruction(stage):
+    array = [element for element in stage]
+    finish = 0
+
+    for i in range(len(stage)):
+        finish += stage[i]
+        for j in range(stage[i]):
+            temp = "I" + f"{i + 1}"
+            if j == 0:
+                array[finish - stage[i]] = temp
+            else:
+                array.insert(finish - stage[i] + j, f"{temp}")
+    return array
+
+def centralize_size(array1, array2):
+    if len(array1) != len(array2):
+        difference = len(array1) - len(array2)
+        for i in range(difference):
+            array2.insert(len(array2), "  ")
+    return array2
+
+def standard_stages_array(fetch_array, decode_array, execute_array, wrt_array):
+    array1 = fetch_array
+    array2 = decode_array
+    array3 = execute_array
+    array4 = wrt_array
+
+    size_IF = len(fetch_array)
+    size_ID = len(decode_array)
+    size_EX = len(execute_array)
+    size_WB = len(wrt_array)
+
+    each_stage_size = [size_IF, size_ID, size_EX, size_WB]
+    max_value = max(each_stage_size)
+
+    if max_value == size_IF:
+        array2 = centralize_size(fetch_array, decode_array)
+        array3 = centralize_size(fetch_array, execute_array)
+        array4 = centralize_size(fetch_array, wrt_array)
+    elif max_value == size_ID:
+        array1 = centralize_size(decode_array, fetch_array)
+        array3 = centralize_size(decode_array, execute_array)
+        array4 = centralize_size(decode_array, wrt_array)
+    elif max_value == size_EX:
+        array1 = centralize_size(execute_array, fetch_array)
+        array2 = centralize_size(execute_array, decode_array)
+        array4 = centralize_size(execute_array, wrt_array)
+    elif max_value == size_WB:
+        array1 = centralize_size(wrt_array, fetch_array)
+        array2 = centralize_size(wrt_array, decode_array)
+        array3 = centralize_size(wrt_array, execute_array)
+    return array1, array2, array3, array4
+
+def shifting(array1, array2):
+    for i in range(len(array1)):
+        for i in range(len(array2)):
+            if array1[i] == "  " and array2[i] == "  ":
+                continue
+            elif array1[i] != array2[i]:
+                continue
+            elif array1[i] == array2[i]:
+                array1.insert(len(array1), "  ")
+                array2.insert(i, "  ")
+    return array1, array2
+
+def sub_check1(array1, array2, array3, array4):
+    a = 0
+    for i, j, k, l in zip(array1, array2, array3, array4):
+        if i == "  " and j == "  " and k == "  " and l == "  ":
+            array1.pop(a)
+            array2.pop(a)
+            array3.pop(a)
+            array4.pop(a)
+        a += 1
+    return array1, array2, array3, array4
+
+def sub_check2(array1, array2):
+    for j in range(len(array1)):
+        for k in range(len(array2)):
+            if k == j + 1:
+                if array2[j + 1] != array1[j] and array2[j + 1] != "  " and array2[j] == "  ":
+                    array2.insert(len(array2), "  ")
+                    array2.pop(j)
+    return array1, array2
+
+def check(array1, array2, array3, array4):
+    array1, array2, array3, array4 = sub_check1(array1, array2, array3, array4)
+    array2, array3 = sub_check2(array2, array3)
+    array3, array4 = sub_check2(array3, array4)
+    return array1, array2, array3, array4
+
+def shifting_process(array1, array2, array3, array4):
+    array1, array2 = shifting(array1, array2)
+    array3 = centralize_size(array1, array3)
+    array4 = centralize_size(array1, array4)
+
+    array1, array3 = shifting(array1, array3)
+    array2 = centralize_size(array1, array2)
+    array4 = centralize_size(array1, array4)
+
+    array1, array4 = shifting(array1, array4)
+    array2 = centralize_size(array1, array2)
+    array3 = centralize_size(array1, array3)
+
+    array2, array3 = shifting(array2, array3)
+    array1 = centralize_size(array2, array1)
+    array4 = centralize_size(array2, array4)
+
+    array2, array4 = shifting(array2, array4)
+    array1 = centralize_size(array2, array1)
+    array3 = centralize_size(array2, array3)
+
+    array3, array4 = shifting(array3, array4)
+    array1 = centralize_size(array3, array1)
+    array2 = centralize_size(array3, array2)
+    return array1, array2, array3, array4
+
+def final_pipeline(array1, array2, array3, array4):
+    temp1 = [element for element in array1]
+    temp2 = [element for element in array2]
+    temp3 = [element for element in array3]
+    temp4 = [element for element in array4]
+    array1, array2, array3, array4 = check(array1, array2, array3, array4)
+    for i in range(100):
+        if temp1 != array1 or temp2 != array2 or temp3 != array3 or temp4 != array4:
+            array1, array2, array3, array4 = check(array1, array2, array3, array4)
+        else:
+            break
+    return array1, array2, array3, array4
+
+
+# User input for the number of instructions and time in each stage
+
+
+def run_simulation():
+    try:
+        num_instructions = int(entry_num_instructions.get())
+        user = []
+
+        for i in range(num_instructions):
+            times = list(map(int, entry_instructions[i].get().split()))
+            user.append(times)
+
+        # Rest of the code remains the same
+        rows = len(user)
+        columns = len(user[0])
+        print("Instructions =", rows, "/ Stages =", columns)
+
+        NP = 0
+        for R in user:
+            for time in R:
+                NP += time
+
+        fetch_time = [R[0] for R in user]
+        decode_time = [R[1] for R in user]
+        execute_time = [R[2] for R in user]
+        wrt_time = [R[3] for R in user]
+
+        fetch_array = convert_to_Instruction(fetch_time)
+        decode_array = convert_to_Instruction(decode_time)
+        execute_array = convert_to_Instruction(execute_time)
+        wrt_array = convert_to_Instruction(wrt_time)
+
+        array1, array2, array3, array4 = standard_stages_array(fetch_array, decode_array, execute_array, wrt_array)
+        array1, array2, array3, array4 = shifting_process(array1, array2, array3, array4)
+        array1, array2, array3, array4 = final_pipeline(array1, array2, array3, array4)
+
+        # Update or display results in the GUI
+        result_text.delete(1.0, tk.END)
+        result_text.insert(tk.END, "_________________________PIPELINE RESULT_______________________\n")
+        result_text.insert(tk.END, str(array1) + '\n')
+        result_text.insert(tk.END, str(array2) + '\n')
+        result_text.insert(tk.END, str(array3) + '\n')
+        result_text.insert(tk.END, str(array4) + '\n')
+        result_text.insert(tk.END, "Time for Pipeline = {}\n".format(len(array4)))
+        result_text.insert(tk.END, "Time for Non-Pipeline = {}\n".format(NP))
+        result_text.insert(tk.END, "Speedup = {:.2f}\n".format(NP / len(array4)))
+
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values for instructions and times.")
+
+# Tkinter GUI setup
+root = tk.Tk()
+root.title("Pipeline Simulator")
+
+# Create and place widgets
+label_num_instructions = tk.Label(root, text="Enter the number of instructions:")
+label_num_instructions.pack()
+
+entry_num_instructions = tk.Entry(root)
+entry_num_instructions.pack()
+
+labels_stages = ["Fetch", "Decode", "Execute", "Write Back"]
+entry_instructions = []
+
+for i in range(10):  # Assuming a maximum of 10 instructions for simplicity
+    tk.Label(root, text=f"Instruction {i + 1} times for each stage (space-separated):").pack()
+    entry = tk.Entry(root)
+    entry.pack()
+    entry_instructions.append(entry)
+
+button_run = tk.Button(root, text="Run Simulation", command=run_simulation)
+button_run.pack()
+
+result_text = tk.Text(root, height=20, width=80)
+result_text.pack()
+
+root.mainloop()
